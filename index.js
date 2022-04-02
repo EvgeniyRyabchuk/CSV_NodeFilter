@@ -8,13 +8,18 @@ const fs = require('fs')
 const util = require('util')
 const directoryPath = path.resolve(__dirname, 'data') 
 const lStat = util.promisify(fs.lstat);
-const csvHanler = require("./src/csvHandle")
+const csvHanler = require("./src/csvHandle") 
 
 
 
-csvHanler.handle(process.cwd()); 
+csvHanler.handle(process.cwd(), {
+    city: [
+        "Белгород", 
+        
+    ]
+}); 
 
-console.log("Hello world!");
+console.log("Hello world!"); 
 
 // process.argv.forEach(function (val, index, array) {
 //     console.log(index + ': ' + val);

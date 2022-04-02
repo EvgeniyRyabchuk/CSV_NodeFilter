@@ -25,8 +25,7 @@ async function maxSize(curDir, files) {
 }
 
 
-
-function handle(rootPath) {
+function handle(rootPath, filterArgs) {
 
     const directoryPath = path.resolve(rootPath, 'data'); 
 
@@ -41,14 +40,19 @@ function handle(rootPath) {
         //     }
         // })
     
-       const biggestFile = await maxSize(path.resolve(rootPath, "data"), files);
+       const biggestFile = await maxSize(path.resolve(rootPath, "data"), files); 
   
         files.forEach(function (file, index, array) { 
             // filtered data 
             const results = [];
             fs.createReadStream(path.resolve(rootPath, 'data', file))
             .pipe(csv())
-            .on('data', (data) => data.address_city == "Белгород" && results.push(data)) 
+            .on('data', (data) => {
+                for(let i of filterArgs.city) {
+                    data.address_city == i && results.push(data)  
+                }
+               
+                }) 
             .on('end', async () => { 
                 
                 // create folder output if not exist 
