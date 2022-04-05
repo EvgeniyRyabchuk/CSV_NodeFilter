@@ -2,7 +2,7 @@ const csv = require('csv-parser');
 const path = require('path'); 
 const fs = require('fs')
 const util = require('util')
-
+const Checker = require('./Checker'); 
 const lStat = util.promisify(fs.lstat);
 
 async function maxSize(curDir, files) {
@@ -25,6 +25,9 @@ async function maxSize(curDir, files) {
 }
 
 
+
+
+
 function handle(rootPath, filterArgs) {
 
     const directoryPath = path.resolve(rootPath, 'data'); 
@@ -33,35 +36,29 @@ function handle(rootPath, filterArgs) {
         if (err) {
             return console.log('Unable to scan directory: ' + err); 
         } 
-        // files = files.filter(async (e) => {
-        //     const stats = await lStat(e); 
-        //     if(stats.isFile()) {
-        //         return e; 
-        //     }
-        // })
-    
+
        const biggestFile = await maxSize(path.resolve(rootPath, "data"), files); 
   
         files.forEach(function (file, index, array) { 
             // filtered data 
             const results = [];
+            // only files 
+            let stats = fs.statSync(path.resolve(rootPath, "data", file));                 
+            if(!stats.isFile()) return; 
+
             fs.createReadStream(path.resolve(rootPath, 'data', file))
             .pipe(csv())
             .on('data', (data) => {
-                for(let i of filterArgs.city) {
-                    data.address_city == i && results.push(data)  
-                }
-               
+                if(new Checker(data, filterArgs).checkAll()) 
+                    results.push(data); 
                 }) 
             .on('end', async () => { 
-                
                 // create folder output if not exist 
                 const outputPath = path.resolve(rootPath, 'output'); 
                 
                 if (!fs.existsSync(outputPath)) { 
                     fs.mkdirSync(outputPath);
                 }
-    
                 
                 // save each filtered table as separated json file  
                 let json = JSON.stringify(results); 
@@ -103,15 +100,11 @@ function handle(rootPath, filterArgs) {
                 
             });
         
-    
-            
         })
-        
-    
+
     })
     
 }
-
 
 module.exports = {
     handle

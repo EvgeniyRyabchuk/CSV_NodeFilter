@@ -14,8 +14,10 @@ const csvHanler = require("./src/csvHandle")
 
 csvHanler.handle(process.cwd(), {
     city: [
-        "Белгород", 
-        
+        "Москва", 
+    ], 
+    full_name: [
+        "Иваненко"
     ]
 }); 
 
